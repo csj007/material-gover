@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <title>原料记录系统</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f9f9f9;
+      padding: 30px;
+      color: #333;
+    }
+  
+    h2 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+  
+    .material-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      background: #fff;
+      padding: 10px 15px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+  
+    input[type="text"], input[type="number"] {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 10px;
+      flex: 1;
+      min-width: 180px;
+    }
+  
+    input[type="text"] {
+      width: 220px;
+    }
+  
+    input[type="number"] {
+      width: 100px;
+    }
+  
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+  
+    button:hover {
+      background-color: #2980b9;
+    }
+  
+    #output {
+      margin-top: 30px;
+      padding: 15px;
+      background: #f1f1f1;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      min-height: 100px;
+      border: 1px solid #ddd;
+    }
+  
+    .container-buttons {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+  
+    @media (max-width: 600px) {
+      .material-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+  
+      .container-buttons {
+        flex-direction: column;
+      }
+  
+      input[type="text"], input[type="number"] {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+    
+    .material-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+    }
+    
+    .material-table th {
+      background-color: #3498db;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    
+    .material-table td {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    
+    .material-table tbody td {
+      background-color: #f9f9f9;
+    }
+    
+    .material-table thead tr:first-child th {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    /* 响应式优化 */
+    @media (max-width: 600px) {
+      .material-table td,
+      .material-table th {
+        font-size: 14px;
+        padding: 6px;
+      }
+    }
+    .table-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      justify-content: flex-end;
+    }
+    
+    .table-buttons button {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+    
+    .table-buttons button:hover {
+      background-color: #219150;
+    }
+    
+    .modal-window {
+      position: fixed;
+      top: 10%;
+      left: 20%;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      z-index: 1000;
+      width: 600px;
+      max-width: 90%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    
+    .modal-window table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    
+    .modal-window th,
+    .modal-window td {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #ddd;
+      word-break: break-all;
+    }
+    
+    .modal-window input[type="text"] {
+      width: 100%;
+      padding: 5px;
+      box-sizing: border-box;
+      max-width: 200px;
+      font-size: 14px;
+    }
+    
+    .modal-window button {
+      margin: 0 2px;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    
+    .modal-window th {
+      background-color: #3498db;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h2>原料记录系统</h2>
+  <button onclick="addMaterial()"><i class="fas fa-plus"></i> 添加原料</button>
+  <button onclick="submitRecord()"><i class="fas fa-check"></i> 提交记录</button>
+  <button onclick="showAddMaterialModal()"><i class="fas fa-plus-square"></i> 新增药品</button>
+  <button onclick="showMaterialListModal()">查看药品清单</button>
+  <div id="materialContainer"></div>
+  <div id="output"></div>
+  <!-- 新增药品 Modal -->
+  <div id="addMaterialModal" class="modal-window" style="display:none;">
+    <h3>新增药品</h3>
+    <label>药品名称:</label><br>
+    <input type="text" id="materialName" style="width:100%; margin-bottom:10px;"><br>
+    <label>药品编号:</label><br>
+    <input type="text" id="materialTag" style="width:100%; margin-bottom:10px;"><br>
+    <button onclick="addNewMaterial()">录入药品</button>
+    <button onclick="document.getElementById('addMaterialModal').style.display='none';">取消</button>
+    <div id="materialError" style="color:red; margin-top:10px;"></div>
+  </div>
+  <!-- 查看药品清单 Modal -->
+  <div id="materialListModal" style="display:none; position:fixed; top:10%; left:20%; background:#fff; padding:20px; border:1px solid #ccc; z-index:1000; width:780px; max-height: 800px; overflow: hidden;">
+    <h3>药品清单</h3>
+    <div id="materialListContent" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px;"></div>
+    <button onclick="document.getElementById('materialListModal').style.display = 'none';" style="margin-top: 10px;">关闭</button>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
